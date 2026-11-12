@@ -37,6 +37,8 @@ tooling/          build, validation and tests (Node 22+, no dependencies)
 
 ## Adding or changing a skill
 
+This repo is the only place to change a skill. Installed copies in workspaces are read-only, and the extension replaces any local edits on install or update.
+
 1. Create or edit `skills/<id>/`. The id uses lowercase letters, digits and single hyphens, up to 64 characters. VS Code silently skips skills that break this rule.
 2. Bump `version` in `item.json` whenever any shipped file changes. CI fails if content changes without a bump.
 3. Run `npm test` and `npm run check`.
