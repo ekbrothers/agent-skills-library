@@ -1,0 +1,15 @@
+{
+  "name": "agent-skills-library",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared agent skills for Claude Code, GitHub Copilot and Cortex Code, published as release assets for the Prompt Library extension.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "node tooling/build.mjs --check",
+    "build": "node tooling/build.mjs",
+    "test": "node --test \"tooling/*.test.mjs\""
+  }
+}

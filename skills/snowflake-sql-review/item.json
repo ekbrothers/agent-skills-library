@@ -1,0 +1,6 @@
+{
+  "title": "Snowflake SQL review",
+  "summary": "Review Snowflake SQL for fan-out joins, wasted scans and pruning problems, with rewrites.",
+  "version": "1.0.0",
+  "tools": ["claude", "copilot", "cortex"]
+}

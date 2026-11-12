@@ -1,0 +1,6 @@
+{
+  "title": "Model card",
+  "summary": "Write or update a model card from training code, data sources and recorded metrics.",
+  "version": "1.0.0",
+  "tools": ["claude", "copilot", "cortex"]
+}

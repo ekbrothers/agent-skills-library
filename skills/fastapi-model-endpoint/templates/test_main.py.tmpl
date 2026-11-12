@@ -1,0 +1,46 @@
+"""Tests for the model API. Uses a stub model so tests do not need the real artifact."""
+
+import pytest
+from fastapi.testclient import TestClient
+
+import main
+
+
+class StubModel:
+    def predict(self, rows):
+        return [0.42 for _ in rows]
+
+
+@pytest.fixture
+def client(monkeypatch):
+    monkeypatch.setattr(main, "load_model", lambda: StubModel())
+    with TestClient(main.app) as c:
+        yield c
+
+
+VALID = {"tenure_months": 12, "monthly_premium": 85.5, "region": "north"}  # TODO
+
+
+def test_health(client):
+    r = client.get("/health")
+    assert r.status_code == 200
+    assert r.json()["model_version"] == main.MODEL_VERSION
+
+
+def test_predict_ok(client):
+    r = client.post("/predict", json=VALID)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["prediction"] == pytest.approx(0.42)
+    assert body["request_id"]
+
+
+def test_predict_rejects_bad_input(client):
+    r = client.post("/predict", json={**VALID, "tenure_months": -1})
+    assert r.status_code == 422
+
+
+def test_predict_rejects_missing_field(client):
+    bad = dict(VALID)
+    bad.pop("region")
+    assert client.post("/predict", json=bad).status_code == 422

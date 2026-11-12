@@ -1,0 +1,72 @@
+"""Model-serving API. Replace every TODO with the project's real values."""
+
+import logging
+import time
+import uuid
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+import joblib  # TODO: swap for the project's loader (mlflow, onnxruntime, ...)
+from fastapi import FastAPI, HTTPException, Request
+from pydantic import BaseModel, Field
+
+MODEL_PATH = Path("models/model.joblib")  # TODO
+MODEL_VERSION = "0.1.0"  # TODO: read from the artifact's metadata if available
+
+log = logging.getLogger("model_api")
+state: dict = {}
+
+
+def load_model():
+    return joblib.load(MODEL_PATH)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    state["model"] = load_model()
+    log.info("model loaded version=%s", MODEL_VERSION)
+    yield
+    state.clear()
+
+
+app = FastAPI(title="Model API", lifespan=lifespan)
+
+
+class PredictRequest(BaseModel):
+    # TODO: one field per model feature, with real types and bounds.
+    tenure_months: int = Field(ge=0, le=600)
+    monthly_premium: float = Field(gt=0)
+    region: str = Field(min_length=1, max_length=32)
+
+
+class PredictResponse(BaseModel):
+    prediction: float
+    model_version: str
+    request_id: str
+
+
+@app.middleware("http")
+async def timing(request: Request, call_next):
+    request_id = str(uuid.uuid4())
+    request.state.request_id = request_id
+    start = time.perf_counter()
+    response = await call_next(request)
+    log.info("request_id=%s path=%s status=%s ms=%.1f", request_id, request.url.path,
+             response.status_code, (time.perf_counter() - start) * 1000)
+    return response
+
+
+@app.get("/health")
+def health():
+    if "model" not in state:
+        raise HTTPException(status_code=503, detail="model not loaded")
+    return {"status": "ok", "model_version": MODEL_VERSION}
+
+
+@app.post("/predict", response_model=PredictResponse)
+def predict(body: PredictRequest, request: Request) -> PredictResponse:
+    model = state["model"]
+    features = [[body.tenure_months, body.monthly_premium, body.region]]  # TODO: match training order
+    score = float(model.predict(features)[0])
+    return PredictResponse(prediction=score, model_version=MODEL_VERSION,
+                           request_id=request.state.request_id)

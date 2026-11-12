@@ -1,0 +1,6 @@
+{
+  "title": "Streamlit app review",
+  "summary": "Find slow reruns, caching gaps, session state bugs and exposed secrets in a Streamlit app.",
+  "version": "1.0.0",
+  "tools": ["claude", "copilot", "cortex"]
+}

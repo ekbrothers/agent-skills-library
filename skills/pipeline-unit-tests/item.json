@@ -1,0 +1,6 @@
+{
+  "title": "Pipeline unit tests",
+  "summary": "Write pytest tests for pandas, Polars or PySpark transforms with small inline frames.",
+  "version": "1.0.0",
+  "tools": ["claude", "copilot", "cortex"]
+}

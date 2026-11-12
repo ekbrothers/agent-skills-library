@@ -1,0 +1,6 @@
+{
+  "title": "FastAPI model endpoint",
+  "summary": "Add a typed, tested /predict endpoint with a health check to a FastAPI service.",
+  "version": "1.2.0",
+  "tools": ["claude", "copilot", "cortex"]
+}
